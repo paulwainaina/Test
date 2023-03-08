@@ -1,16 +1,16 @@
 {{template "header"}}
     <title>{{.Title}}</title>
 {{template "body"}}  
-
-<form id="registerform">
+<div class="container">
+<form class="needs-validation" id="registerform" novalidate style="margin:auto;max-width: 480px;">
     <div class="mb-3 row">
-        <label for="username" class="col-sm-2 col-form-label">Username</label>
+        <label for="username" class="col-sm-2 col-form-label" required>Username</label>
         <div class="col-sm-10">
           <input type="text" class="form-control" id="username">
         </div>
     </div>
     <div class="mb-3 row">
-        <label for="password" class="col-sm-2 col-form-label">Password</label>
+        <label for="password" class="col-sm-2 col-form-label" required>Password</label>
         <div class="col-sm-10">
           <input type="password" class="form-control" id="password">
         </div>      
@@ -22,12 +22,14 @@
 <div id="errordiv">
 
 </div>
+</div>
 <script>
     let form=document.getElementById("registerform")
     let y=document.getElementById("errordiv")
     form.addEventListener("submit",(event)=>{
         event.preventDefault()
         event.stopPropagation()
+        if (form.checkValidity()){
         var data=JSON.stringify({"Username":form.username.value,"Password":form.password.value})
         fetch('http://127.0.0.1:8001/register',{ method:'POST',headers:{'Content-Type':'application/json'},credentials:"include",body: data}).then(
         (result)=>{                    
@@ -51,6 +53,7 @@
             y.innerHTML=e
             form.classList.remove('was-validated')
         })            
+        }
         setTimeout(()=>{ 
             y.className="alter"
             y.innerHTML=""

@@ -1,7 +1,7 @@
 {{template "header"}}
     <title>{{.Title}}</title>
 {{template "body"}}  
-
+<div class="container">
 <div class="row">
     <div class="col-4">
         <form id="postform">
@@ -29,7 +29,9 @@
         
     </div>
 </div>
+</div>
 <script>
+    window.onload=getpost()
     let form=document.getElementById("postform")
     let y=document.getElementById("errordiv")
     form.addEventListener("submit",(event)=>{
@@ -79,11 +81,29 @@
                 form.classList.remove('was-validated')
             }else{
                 x=document.getElementById("p")
-                for(var i=0;i<d.length;i++){
-                    const node = document.createElement("label");
-                    const textnode = document.createTextNode(d["Title"]);
-                    node.appendChild(textnode);
+                while (x.hasChildNodes()) {
+                    x.removeChild(x.firstChild);
+                }
+                for(var i=data.length-1;i>=0;i--){
+                    const node = document.createElement("div"); 
+                    node.className="card"                   
+                    const t = document.createElement("p");
+                    t.className="card-header"  
+                    const textnode = document.createTextNode(data[i]["Title"]);
+                    t.appendChild(textnode);
+                    const text=document.createElement("p")
+                    text.className="card-text"  
+                    const textnode1 = document.createTextNode(data[i]["Body"]);
+                    text.appendChild(textnode1)
+                    const tf=document.createElement("p")
+                    tf.className="card-footer"
+                    const textnode2 = document.createTextNode(data[i]["Date"]);
+                    tf.appendChild(textnode2)
+                    node.appendChild(t)
+                    node.appendChild(text)
+                    node.appendChild(tf)
                     x.appendChild(node)
+                    x.appendChild(document.createElement("br"))
                 }
                             
             }
