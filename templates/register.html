@@ -1,0 +1,59 @@
+{{template "header"}}
+    <title>{{.Title}}</title>
+{{template "body"}}  
+
+<form id="registerform">
+    <div class="mb-3 row">
+        <label for="username" class="col-sm-2 col-form-label">Username</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" id="username">
+        </div>
+    </div>
+    <div class="mb-3 row">
+        <label for="password" class="col-sm-2 col-form-label">Password</label>
+        <div class="col-sm-10">
+          <input type="password" class="form-control" id="password">
+        </div>      
+    </div>
+    <div class="mb-3 row">
+        <button  class="btn btn-primary" type="submit"  >Register</button>
+    </div>
+</form>
+<div id="errordiv">
+
+</div>
+<script>
+    let form=document.getElementById("registerform")
+    let y=document.getElementById("errordiv")
+    form.addEventListener("submit",(event)=>{
+        event.preventDefault()
+        event.stopPropagation()
+        var data=JSON.stringify({"Username":form.username.value,"Password":form.password.value})
+        fetch('http://127.0.0.1:8001/register',{ method:'POST',headers:{'Content-Type':'application/json'},credentials:"include",body: data}).then(
+        (result)=>{                    
+            if (!result.ok){                    
+                throw new Error(JSON.stringify(result.body));
+            }
+            return result.json();
+        }
+        ).then((data)=>{    
+            if(data.hasOwnProperty('Error')){
+                y.classList.add("alter-danger")
+                y.innerHTML=data['Error']
+                form.classList.remove('was-validated')
+            }else{
+                y.classList.add("alter-success")
+                y.innerHTML="Correct credentials"
+                window.location.assign("http://127.0.0.1:8001/loginPage")
+            }
+        }).catch((e)=>{
+            y.classList.add("alter-danger")
+            y.innerHTML=e
+            form.classList.remove('was-validated')
+        })            
+        setTimeout(()=>{ 
+            y.className="alter"
+            y.innerHTML=""
+        },10000)
+    })
+</script>

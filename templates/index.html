@@ -1,0 +1,100 @@
+{{template "header"}}
+    <title>{{.Title}}</title>
+{{template "body"}}  
+
+<div class="row">
+    <div class="col-4">
+        <form id="postform">
+            <div class="mb-3 row">
+                <label for="Title" class="col-sm-2 col-form-label">Title</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" id="Title">
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label for="post" class="col-sm-2 col-form-label">Message</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" id="post">
+                </div>      
+            </div>
+            <div class="mb-3 row">
+                <button  class="btn btn-primary" type="submit"  >Post</button>
+            </div>
+        </form>
+        <div id="errordiv">
+        
+        </div>
+    </div>
+    <div id ="p"class="col-4">
+        
+    </div>
+</div>
+<script>
+    let form=document.getElementById("postform")
+    let y=document.getElementById("errordiv")
+    form.addEventListener("submit",(event)=>{
+        event.preventDefault()
+        event.stopPropagation()
+        var data=JSON.stringify({"Title":form.Title.value,"Body":form.post.value})
+        fetch('http://127.0.0.1:8001/posts',{ method:'POST',headers:{'Content-Type':'application/json'},credentials:"include",body: data}).then(
+        (result)=>{                    
+            if (!result.ok){                    
+                throw new Error(JSON.stringify(result.body));
+            }
+            return result.json();
+        }
+        ).then((data)=>{    
+            if(data.hasOwnProperty('Error')){
+                y.classList.add("alter-danger")
+                y.innerHTML=data['Error']
+                form.classList.remove('was-validated')
+            }else{
+                y.classList.add("alter-success")
+                y.innerHTML="posted"
+                getpost()
+            }
+        }).catch((e)=>{
+            y.classList.add("alter-danger")
+            y.innerHTML=e
+            form.classList.remove('was-validated')
+        })            
+        setTimeout(()=>{ 
+            y.className="alter"
+            y.innerHTML=""
+        },10000)
+    })
+
+    function getpost(){
+        fetch('http://127.0.0.1:8001/posts',{ method:'GET',headers:{'Content-Type':'application/json'},credentials:"include"}).then(
+        (result)=>{                    
+            if (!result.ok){                    
+                throw new Error(JSON.stringify(result.body));
+            }
+            return result.json();
+        }
+        ).then((data)=>{    
+            if(data.hasOwnProperty('Error')){
+                y.classList.add("alter-danger")
+                y.innerHTML=data['Error']
+                form.classList.remove('was-validated')
+            }else{
+                x=document.getElementById("p")
+                for(var i=0;i<d.length;i++){
+                    const node = document.createElement("label");
+                    const textnode = document.createTextNode(d["Title"]);
+                    node.appendChild(textnode);
+                    x.appendChild(node)
+                }
+                            
+            }
+        }).catch((e)=>{
+            y.classList.add("alter-danger")
+            y.innerHTML=e
+            form.classList.remove('was-validated')
+        })            
+        setTimeout(()=>{ 
+            y.className="alter"
+            y.innerHTML=""
+        },10000)
+    }
+</script>

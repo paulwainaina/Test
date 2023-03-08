@@ -48,7 +48,7 @@ func (users *UserController) Login(user User) (*User, error) {
 		if x.Username == user.Username { // first get the user
 			err := bcrypt.CompareHashAndPassword([]byte(x.Password), []byte(user.Password)) //Compare the hash
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Wrong credentials")
 			}
 			return x, nil
 		}
@@ -57,10 +57,14 @@ func (users *UserController) Login(user User) (*User, error) {
 }
 
 func (users *UserController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
 	if r.Method == "POST" {
 		switch r.URL.Path {
 		case "/login":
 			{
+				w.Header().Set("Access-Control-Allow-Origin", "http://127.0.0.1:8001")
+				w.Header().Set("Access-Control-Allow-Credentials", "true")
+				w.Header().Set("Access-Control-Expose-Headers", "*")
 				u := User{}
 				err := json.NewDecoder(r.Body).Decode(&u)
 				if err != nil {
@@ -69,13 +73,14 @@ func (users *UserController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 				user, err := users.Login(u)
 				if err != nil {
-					w.Write([]byte(err.Error()))
+					res := struct{ Error string }{Error: err.Error()}
+					json.NewEncoder(w).Encode(res)
 					return
 				}
 				http.SetCookie(w, &http.Cookie{
 					Name:     "username",
-					Value:    user.Username,
-					Expires:  time.Now().Add(time.Minute * 20),
+					Value:    u.Username,
+					Expires:  time.Now().Add(time.Minute * 30),
 					Path:     "/",
 					SameSite: http.SameSiteStrictMode,
 				})
@@ -92,7 +97,8 @@ func (users *UserController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 				user, err := users.Register(u)
 				if err != nil {
-					w.Write([]byte(err.Error()))
+					res := struct{ Error string }{Error: err.Error()}
+					json.NewEncoder(w).Encode(res)
 					return
 				}
 				json.NewEncoder(w).Encode(user)

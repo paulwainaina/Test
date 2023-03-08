@@ -75,9 +75,16 @@ func (posts *PostController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
+				cok,err:=r.Cookie("username")
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				u.User=cok.Value
 				Post, err := posts.MakePost(u)
 				if err != nil {
-					w.Write([]byte(err.Error()))
+					res := struct{ Error string }{Error: err.Error()}
+					json.NewEncoder(w).Encode(res)
 					return
 				}
 				json.NewEncoder(w).Encode(Post)
@@ -94,7 +101,8 @@ func (posts *PostController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 				Post, err := posts.GetPost(cok.Value)
 				if err != nil {
-					w.Write([]byte(err.Error()))
+					res := struct{ Error string }{Error: err.Error()}
+					json.NewEncoder(w).Encode(res)
 					return
 				}
 				json.NewEncoder(w).Encode(Post)
