@@ -8,7 +8,9 @@ import (
 
 	"example.com/test"
 )
+
 var tpl *template.Template
+
 func init() {
 	tpl = template.Must(template.ParseGlob("./templates/*.html"))
 }
@@ -41,7 +43,7 @@ func RenderTemplate(w http.ResponseWriter, file string, page *Page) {
 }
 
 func middleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {	
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-cache")
 		if r.Method == "OPTIONS" {
 			w.Header().Set("Access-Control-Allow-Origin", "http://127.0.0.1:8001")
@@ -50,7 +52,7 @@ func middleware(next http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 			return
 		}
-		if r.URL.Path == "/posts" || r.URL.Path=="/index" {
+		if r.URL.Path == "/posts" || r.URL.Path == "/index" {
 			_, err := r.Cookie("username")
 			if err != nil {
 				http.Redirect(w, r, "/loginPage", http.StatusMovedPermanently)
@@ -95,18 +97,18 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, file, page)
 }
 
-
 func main() {
-	pos:=test.NewPostController()
+	pos := test.NewPostController()
 	http.Handle("/posts", middleware(http.HandlerFunc(pos.ServeHTTP)))
-	user:=test.NewUserController()
-	http.Handle("/register",middleware(http.HandlerFunc(user.ServeHTTP)))
-	http.Handle("/login",middleware(http.HandlerFunc(user.ServeHTTP)))
+	user := test.NewUserController()
+	http.Handle("/register", middleware(http.HandlerFunc(user.ServeHTTP)))
+	http.Handle("/login", middleware(http.HandlerFunc(user.ServeHTTP)))
 
+	http.Handle("/loginPage", middleware(http.HandlerFunc(LoginHandler)))
+	http.Handle("/index", middleware(http.HandlerFunc(IndexHandler)))
+	http.Handle("/registerPage", middleware(http.HandlerFunc(RegisterHandler)))
 
-	http.Handle("/loginPage",middleware(http.HandlerFunc(LoginHandler)))
-	http.Handle("/index",middleware(http.HandlerFunc(IndexHandler)))
-	http.Handle("/registerPage",middleware(http.HandlerFunc(RegisterHandler)))
+	http.Handle("/", http.RedirectHandler("/index", http.StatusSeeOther))
 
 	err := http.ListenAndServe("127.0.0.1:8001", nil)
 	if err == http.ErrServerClosed {
